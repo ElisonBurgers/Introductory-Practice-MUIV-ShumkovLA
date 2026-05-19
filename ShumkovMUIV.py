@@ -120,3 +120,42 @@ print(f"2. Среднеквадратическое отклонение: {std_v
 print(f"3. Размах:                          {range_val:.2f} °C")
 print(f"4. Коэффициент вариации:            {cv_val:.2f} %")
 print(f"5. Третий квартиль (Q3):            {q3_val:.2f} °C")
+
+
+"""
+ЗАДАНИЕ 5
+Провести визуализацию
+
+3.Гистограмма
+4.Ящик с усами
+5.График отсортированных значений (по возрастанию или убыванию)
+"""
+
+print("\n{[]} ЗАДАНИЕ 5: ПРОВЕСТИ ВИЗУАЛИЗАЦИЮ {[]}")
+print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+matplotlib.pyplot.figure(figsize=(15, 5))
+
+matplotlib.pyplot.subplot(1, 3, 1)
+matplotlib.pyplot.hist(df_clean["temperature"], bins=30, color="skyblue", edgecolor="black")
+matplotlib.pyplot.title("Гистограмма температуры")
+matplotlib.pyplot.xlabel("Температура (°C)")
+matplotlib.pyplot.ylabel("Частота")
+
+matplotlib.pyplot.subplot(1, 3, 2)
+matplotlib.pyplot.boxplot(df_clean["temperature"], vert=True, patch_artist=True,
+                          boxprops=dict(facecolor="lightgreen"))
+matplotlib.pyplot.title("Ящик с усами")
+matplotlib.pyplot.ylabel("Температура (°C)")
+matplotlib.pyplot.xticks([1], ["Температура"])
+
+matplotlib.pyplot.subplot(1, 3, 3)
+sorted_temps = sorted(df_clean["temperature"])
+matplotlib.pyplot.plot(sorted_temps, color="coral", linewidth=0.8)
+matplotlib.pyplot.title("Отсортированные значения")
+matplotlib.pyplot.xlabel("Порядковый номер")
+matplotlib.pyplot.ylabel("Температура (°C)")
+
+matplotlib.pyplot.tight_layout()
+matplotlib.pyplot.savefig("visualization.png", dpi=150)
+matplotlib.pyplot.show()
+print("Графики сохранены в visualization.png")
