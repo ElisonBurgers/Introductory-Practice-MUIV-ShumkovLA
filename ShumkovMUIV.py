@@ -81,3 +81,15 @@ print(f"Удалено выбросов: {removed} из {before}")
 print(f"Размер очищенных данных: {after}")
 df_clean.to_csv("temperature_clean.csv", index=False)
 logging.info("Очищенные данные сохранены в temperature_clean.csv")
+
+"""
+ЗАДАНИЕ 3
+Сформировать объект для работы
+"""
+
+print("\n{[]} ЗАДАНИЕ 3: СФОРМИРОВАТЬ ОБЪЕКТ ДЛЯ РАБОТЫ {[]}")
+print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+temp_list = df_clean["temperature"].tolist()
+temp_array = numpy.array(temp_list)
+print(f"Список: длина {len(temp_list)}")
+print(f"NumPy-массив: shape {temp_array.shape}, dtype {temp_array.dtype}")
