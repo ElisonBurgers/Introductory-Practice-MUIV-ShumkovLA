@@ -44,3 +44,40 @@ temperatures = data["hourly"]["temperature_2m"]
 df_raw = pandas.DataFrame({"time": timestamps, "temperature": temperatures})
 print(f"Загружено значений: {len(df_raw)}")
 df_raw.to_csv("temperature_raw.csv", index=False)
+
+"""
+ЗАДАНИЕ 2
+Провести очистку данных, логировать и вывести данные об очистке.
+"""
+
+print("\n{[]} ЗАДАНИЕ 2: ПРОВЕСТИ ОЧИСТКУ ДАННЫХ, ЛОГИРОВАТЬ И ВЫВЕСТИ ДАННЫЕ ОБ ОЧИСТКЕ {[]}")
+print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+logging.basicConfig(
+    filename="cleaning.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logging.info("Начало очистки данных")
+
+df_raw["time"] = pandas.to_datetime(df_raw["time"])
+logging.info("Столбец time преобразован в datetime")
+
+miss_before = df_raw["temperature"].isna().sum()
+logging.info(f"Пропусков до очистки: {miss_before}")
+print(f"Пропусков до очистки: {miss_before}")
+
+Q1 = df_raw["temperature"].quantile(0.25)
+Q3 = df_raw["temperature"].quantile(0.75)
+IQR = Q3 - Q1
+lower = Q1 - 1.5 * IQR
+upper = Q3 + 1.5 * IQR
+
+before = len(df_raw)
+df_clean = df_raw[(df_raw["temperature"] >= lower) & (df_raw["temperature"] <= upper)]
+after = len(df_clean)
+removed = before - after
+logging.info(f"Удалено выбросов: {removed} ({(removed/before)*100:.2f}%)")
+print(f"Удалено выбросов: {removed} из {before}")
+print(f"Размер очищенных данных: {after}")
+df_clean.to_csv("temperature_clean.csv", index=False)
+logging.info("Очищенные данные сохранены в temperature_clean.csv")
