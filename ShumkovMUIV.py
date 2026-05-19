@@ -1,0 +1,46 @@
+"""
+Ознакомительная Практика 1
+
+Выполнил
+Шумков Леонид Алексеевич
+23.08.2006
+ид 30.1/б3-24
+
+#print((23+8+2006)%30)
+Вариант 27
+"""
+### (Команда для установки библиотек) pip install requests pandas numpy matplotlib logging scipy
+
+import requests
+import pandas
+import numpy
+import matplotlib.pyplot
+import logging
+import scipy.stats
+
+"""
+ЗАДАНИЕ 1
+Получить числовой ряд с помощью API
+"""
+
+print("\n{[]} ЗАДАНИЕ 1: ПОЛУЧИТЬ ЧИСЛОВОЙ РЯД С ПОМОЩЬЮ API {[]}")
+print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+BASE_URL = "https://archive-api.open-meteo.com/v1/archive"
+params = {
+    "latitude": 55.7558,
+    "longitude": 37.6173,
+    "start_date": "2023-01-01",
+    "end_date": "2023-03-31",
+    "hourly": "temperature_2m",
+    "timezone": "Europe/Moscow"
+}
+
+response = requests.get(BASE_URL, params=params)
+response.raise_for_status()
+data = response.json()
+
+timestamps = data["hourly"]["time"]
+temperatures = data["hourly"]["temperature_2m"]
+df_raw = pandas.DataFrame({"time": timestamps, "temperature": temperatures})
+print(f"Загружено значений: {len(df_raw)}")
+df_raw.to_csv("temperature_raw.csv", index=False)
