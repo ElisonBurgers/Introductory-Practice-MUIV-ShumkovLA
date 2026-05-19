@@ -93,3 +93,30 @@ temp_list = df_clean["temperature"].tolist()
 temp_array = numpy.array(temp_list)
 print(f"Список: длина {len(temp_list)}")
 print(f"NumPy-массив: shape {temp_array.shape}, dtype {temp_array.dtype}")
+
+"""
+ЗАДАНИЕ 4
+Рассчитать характеристики ряда, вывести их.
+
+1.Минимум 
+12.Среднеквадратическое отклонение
+13.Размах
+14.Коэффициент вариации
+15.Третий квартиль
+"""
+
+
+print("\n{[]} ЗАДАНИЕ 4: РАССЧИТАТЬ ХАРАКТЕРИСТИКИ РЯДА, ВЫВЕСТИ ИХ {[]}")
+print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+min_val = numpy.min(temp_array)
+std_val = numpy.std(temp_array, ddof=1)          # выборочное стандартное отклонение
+range_val = numpy.max(temp_array) - numpy.min(temp_array)
+mean_val = numpy.mean(temp_array)
+cv_val = (std_val / mean_val) * 100 if mean_val != 0 else numpy.nan
+q3_val = numpy.percentile(temp_array, 75)
+
+print(f"1. Минимум:                        {min_val:.2f} °C")
+print(f"2. Среднеквадратическое отклонение: {std_val:.2f} °C")
+print(f"3. Размах:                          {range_val:.2f} °C")
+print(f"4. Коэффициент вариации:            {cv_val:.2f} %")
+print(f"5. Третий квартиль (Q3):            {q3_val:.2f} °C")
