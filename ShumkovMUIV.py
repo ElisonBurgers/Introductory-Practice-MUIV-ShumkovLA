@@ -159,3 +159,63 @@ matplotlib.pyplot.tight_layout()
 matplotlib.pyplot.savefig("visualization.png", dpi=150)
 matplotlib.pyplot.show()
 print("Графики сохранены в visualization.png")
+
+"""
+ЗАДАНИЕ 6
+Провести анализ пропусков внутри временного ряда.
+Предусмотреть метод заполнения пропусков
+Логировать наличие/отсутствие пропусков и метод их устранения.
+"""
+
+print("\n{[]} ЗАДАНИЕ 6: ПРОВЕСТИ АНАЛИЗ ПРОПУСКОВ ВНУТРИ ВРЕМЕННОГО РЯДА {[]}")
+print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+logging.info("Задание 6: анализ пропусков")
+df_missing = df_clean.copy()  # копия, чтобы не менять оригинал
+
+real_miss = df_missing["temperature"].isna().sum()
+print(f"Реальных пропусков в очищенных данных: {real_miss}")
+logging.info(f"Реальных пропусков: {real_miss}")
+
+if real_miss == 0:
+    numpy.random.seed(42)
+    idx = numpy.random.choice(df_missing.index, size=5, replace=False)
+    df_missing.loc[idx, "temperature"] = numpy.nan
+    print("Добавлено 5 искусственных пропусков.")
+    logging.info("Добавлено 5 искусственных пропусков")
+
+median_temp = df_missing["temperature"].median()
+df_missing["temperature"] = df_missing["temperature"].fillna(median_temp)
+remaining = df_missing["temperature"].isna().sum()
+print(f"Пропуски заполнены медианой ({median_temp:.2f} °C). Осталось пропусков: {remaining}")
+logging.info(f"Пропуски заполнены медианой {median_temp:.2f}°C, осталось: {remaining}")
+
+"""
+ЗАДАНИЕ 7
+Сгруппировать данные по категориальному признаку, вывести сгруппированные данные.
+"""
+
+print("\n{[]} ЗАДАНИЕ 7: ГРУППИРОВКА ПО ДНЯМ НЕДЕЛИ {[]}")
+print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+df_clean["day_of_week"] = df_clean["time"].dt.day_name()
+order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+grouped = df_clean.groupby("day_of_week")["temperature"].agg(["mean", "std", "count"])
+grouped = grouped.reindex(order)
+grouped.columns = ["Средняя температура", "Стандартное отклонение", "Количество"]
+print(grouped.to_string())
+grouped.to_csv("grouped_by_weekday.csv")
+print("Сгруппированные данные сохранены в grouped_by_weekday.csv")
+
+"""
+ЗАДАНИЕ 8 
+Найти тройку наибольших и наименьших значений, вывести их.
+"""
+
+print("\n{[]} ЗАДАНИЕ 8: ТРОЙКИ НАИБОЛЬШИХ/НАИМЕНЬШИХ {[]}")
+print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+n = 3
+smallest = df_clean.nsmallest(n, "temperature")
+largest = df_clean.nlargest(n, "temperature")
+print("Три самых низких температуры:")
+print(smallest[["time", "temperature"]].to_string(index=False))
+print("\nТри самых высоких температуры:")
+print(largest[["time", "temperature"]].to_string(index=False))
