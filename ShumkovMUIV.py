@@ -142,8 +142,7 @@ matplotlib.pyplot.xlabel("Температура (°C)")
 matplotlib.pyplot.ylabel("Частота")
 
 matplotlib.pyplot.subplot(1, 3, 2)
-matplotlib.pyplot.boxplot(df_clean["temperature"], vert=True, patch_artist=True,
-                          boxprops=dict(facecolor="lightgreen"))
+matplotlib.pyplot.boxplot(df_clean["temperature"], vert=True, patch_artist=True, boxprops=dict(facecolor="lightgreen"))
 matplotlib.pyplot.title("Ящик с усами")
 matplotlib.pyplot.ylabel("Температура (°C)")
 matplotlib.pyplot.xticks([1], ["Температура"])
@@ -277,3 +276,53 @@ if p_val < alpha:
 else:
     print(f"p >= {alpha} → нет оснований отвергнуть нулевую гипотезу.")
     print("Вывод: сезонность не подтверждена.")
+
+#ОБЪЕДИНЕНИЕ ВСЕХ CSV-ФАЙЛОВ ДЛЯ ОТЧЁТА НА ВСЯКИЙ СЛУЧАЙ
+print("\n=== ОБЪЕДИНЕНИЕ ДАННЫХ В ОДИН ФАЙЛ ===")
+
+# Загрузка сырых данных
+raw = pandas.read_csv("temperature_raw.csv")
+raw = raw.rename(columns={"time": "Время", "temperature": "Температура"})
+raw["Тип"] = "Исходные данные"
+
+# Загрузка очищенных данных
+clean = pandas.read_csv("temperature_clean.csv")
+clean = clean.rename(columns={"time": "Время", "temperature": "Температура"})
+clean["Тип"] = "Очищенные данные"
+
+# Загрузка сгруппированных данных (индекс – день недели)
+grouped = pandas.read_csv("grouped_by_weekday.csv", index_col=0)
+grouped = grouped.reset_index().rename(columns={"index": "День недели"})
+grouped["Тип"] = "Группировка по дням недели"
+
+# Порядок типов для сортировки
+type_order = ["Исходные данные", "Очищенные данные", "Группировка по дням недели"]
+type_dtype = pandas.CategoricalDtype(categories=type_order, ordered=True)
+
+# Единый набор столбцов
+all_columns = ["Тип", "Время", "Температура", "День недели", "Средняя температура", "Стандартное отклонение", "Количество"]
+
+# Приведение всех датафреймов к общему списку колонок
+raw_full = raw.reindex(columns=all_columns)
+clean_full = clean.reindex(columns=all_columns)
+grouped_full = grouped.reindex(columns=all_columns)
+
+# Объединение
+combined = pandas.concat([raw_full, clean_full, grouped_full], ignore_index=True)
+
+# Сортировка: по типу (категориальный порядок), затем по времени, затем по дню недели
+combined["Тип"] = combined["Тип"].astype(type_dtype)
+
+day_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+day_dtype = pandas.CategoricalDtype(categories=day_order, ordered=True)
+combined["День недели"] = combined["День недели"].astype(day_dtype)
+
+combined = combined.sort_values(
+    by=["Тип", "Время", "День недели"],
+    ascending=[True, True, True],
+    na_position="last"
+)
+
+# Сохранение в единый CSV
+combined.to_csv("combined_all_data.csv", index=False, encoding="utf-8-sig")
+print("Сводный файл сохранён как combined_all_data.csv")
