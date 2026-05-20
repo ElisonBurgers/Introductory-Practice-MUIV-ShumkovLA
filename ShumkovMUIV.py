@@ -219,3 +219,61 @@ print("Три самых низких температуры:")
 print(smallest[["time", "temperature"]].to_string(index=False))
 print("\nТри самых высоких температуры:")
 print(largest[["time", "temperature"]].to_string(index=False))
+
+"""
+ЗАДАНИЕ 9
+Сформулировать и проверить гипотезу на очищенных данных
+"""
+
+# Проверка гипотезы о сезонности (различии температур по дням недели)
+# Гипотеза H0: средние температуры во все дни недели равны (сезонности нет)
+# Гипотеза H1: хотя бы в один день средняя отличается (сезонность есть)
+# Используем непараметрический критерий Краскела-Уоллиса
+
+print("\n{[]} ЗАДАНИЕ 9: ПРОВЕРКА ГИПОТЕЗЫ О СЕЗОННОСТИ {[]}")
+print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+
+groups = []
+for day in order:
+    groups.append(df_clean[df_clean["day_of_week"] == day]["temperature"].dropna().values)
+
+def kruskal_wallis(*samples):
+    """Возвращает H-статистику и p-value для теста Краскела-Уоллиса."""
+    all_data = numpy.concatenate(samples)
+    n = len(all_data)
+    ranks = numpy.zeros(n)
+
+    order_ = numpy.argsort(all_data)
+    ranks[order_] = numpy.arange(1, n+1)
+
+    uniq, inverse, counts = numpy.unique(all_data, return_inverse=True, return_counts=True)
+    for i in range(len(uniq)):
+        if counts[i] > 1:
+            idx = numpy.where(inverse == i)[0]
+            ranks[idx] = numpy.mean(ranks[idx])
+
+    rk_groups = []
+    start = 0
+    for s in samples:
+        end = start + len(s)
+        rk_groups.append(ranks[start:end])
+        start = end
+
+    k = len(samples)
+    R_sums = numpy.array([numpy.sum(r) for r in rk_groups])
+    n_i = numpy.array([len(s) for s in samples])
+    H = (12 / (n*(n+1))) * numpy.sum(R_sums**2 / n_i) - 3*(n+1)
+
+    p = 1 - scipy.stats.chi2.cdf(H, k-1)
+    return H, p
+
+H_stat, p_val = kruskal_wallis(*groups)
+alpha = 0.05
+print(f"Статистика Краскела-Уоллиса H = {H_stat:.4f}")
+print(f"p-значение = {p_val:.4f}")
+if p_val < alpha:
+    print(f"p < {alpha} → отвергаем нулевую гипотезу.")
+    print("Вывод: обнаружена статистически значимая сезонность (различие средних по дням недели).")
+else:
+    print(f"p >= {alpha} → нет оснований отвергнуть нулевую гипотезу.")
+    print("Вывод: сезонность не подтверждена.")
